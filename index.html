@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AllFines | Premium Audio</title>
-
-  <!-- Preload para acelerar o carregamento da lib de ícones pesada -->
+  
+  <!-- Preload para acelerar o início -->
+  <link rel="modulepreload" href="https://esm.sh/react@18.3.1" />
   <link rel="modulepreload" href="https://esm.sh/lucide-react@0.555.0" />
 
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,7 +23,12 @@
             display: ['Space Grotesk', 'sans-serif'],
           },
           colors: {
-            agency: { yellow: '#FFD700', black: '#0a0a0a', dark: '#020617', slate: '#1e293b' }
+            agency: {
+              yellow: '#FFD700',
+              black: '#0a0a0a',
+              dark: '#020617',
+              slate: '#1e293b',
+            }
           },
           animation: {
             'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -44,9 +53,10 @@
     ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
   </style>
 
-  <!-- Babel mais recente -->
+  <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 
+  <!-- Import Map -->
   <script type="importmap">
   {
     "imports": {
@@ -65,97 +75,107 @@
   <div id="root"></div>
 
   <script type="module">
-    // === POLYFILL CRÍTICO ===
-    // Define process.env globalmente para que bibliotecas React funcionem rápido sem erros
+    // 1. Definição Global de Process (Crítico para libs React funcionarem)
     globalThis.process = { env: { NODE_ENV: 'production' } };
 
     const blobCache = new Map();
 
-    // Carrega o código fonte tentando várias extensões EM PARALELO (Muito mais rápido)
+    // 2. Carregamento Otimizado (Paralelo)
     async function loadSource(path, parentUrl) {
       const baseUrl = new URL(path, parentUrl).href;
 
-      // Se já tem extensão explícita, vai direto
+      // Se já tem extensão, carrega direto
       if (/\.(tsx?|jsx?)$/i.test(baseUrl)) {
         const res = await fetch(baseUrl);
         if (!res.ok) throw new Error(`404: ${baseUrl}`);
         return { url: baseUrl, source: await res.text() };
       }
 
-      // Se não tem extensão (ex: import Button from './Button'), testa todas ao mesmo tempo
-      const extensions = ['.tsx', '.ts', '/index.tsx', '/index.ts'];
-      const candidates = extensions.map(ext => baseUrl + ext);
+      // Se não tem extensão, tenta todas ao mesmo tempo para não perder tempo
+      const candidates = [
+        baseUrl + '.tsx',
+        baseUrl + '.ts',
+        baseUrl + '/index.tsx',
+        baseUrl + '/index.ts'
+      ];
 
-      // Dispara todas as requisições simultaneamente
-      const results = await Promise.all(
-        candidates.map(url => 
-          fetch(url).then(res => ({ url, res })).catch(() => ({ url, res: { ok: false } }))
-        )
+      // Dispara todas as requisições
+      const promises = candidates.map(url => 
+        fetch(url).then(res => ({ url, res })).catch(() => ({ url, res: { ok: false } }))
       );
 
-      // Pega a primeira que deu certo (status 200)
+      const results = await Promise.all(promises);
       const found = results.find(r => r.res.ok);
-      
+
       if (found) {
         return { url: found.url, source: await found.res.text() };
       }
 
-      throw new Error(`Arquivo não encontrado: ${path} (Tentado: .tsx, .ts, index...)`);
+      throw new Error(`Arquivo não encontrado: ${path}`);
     }
 
-    async function transpile(path, parentUrl = import.meta.url) {
+    // 3. Transpilação Robusta (Igual ao Código 1)
+    async function resolveAndTranspile(path, parentUrl = import.meta.url) {
       const { url, source } = await loadSource(path, parentUrl);
-      
+
       if (blobCache.has(url)) return blobCache.get(url);
 
-      // Detecta imports locais (iniciados com ./ ou ../)
-      const localImports = [...source.matchAll(/\bimport\s+[^'"]*['"]((\.{1,2}[^'"]*))['"]/g)].map(m => m[1]);
-      let code = source;
-
-      // Resolve dependências recursivamente em paralelo
-      if (localImports.length) {
-        const blobs = await Promise.all(localImports.map(imp => transpile(imp, url)));
-        localImports.forEach((imp, i) => {
-          // Escapa caracteres especiais para o regex
-          const esc = imp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          // Substitui o import original pelo Blob URL
-          code = code.replace(new RegExp(`(['"])${esc}\\1`, 'g'), `$1${blobs[i]}$1`);
-        });
+      // Regex para encontrar imports locais
+      const importRegex = /\bimport\s+[^'"]*['"]((\.{1,2}[^'"]*))['"]/g;
+      const localImports = [];
+      let match;
+      
+      // Coleta todos os imports
+      while ((match = importRegex.exec(source)) !== null) {
+        localImports.push(match[1]);
       }
 
-      // === PATCHES LEVES ===
-      // Apenas corrige nomes de pacotes específicos. 
-      // O process.env foi removido daqui pois o Polyfill no topo já resolve.
-      code = code
-        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
-        .replace(/GoogleGenAI/g, 'GoogleGenerativeAI');
+      // Resolve dependências recursivamente em paralelo
+      const resolvedBlobs = await Promise.all(
+        localImports.map(imp => resolveAndTranspile(imp, url))
+      );
 
-      const transpiled = Babel.transform(code, {
+      let code = source;
+
+      // Substitui os imports pelos Blobs gerados
+      localImports.forEach((imp, index) => {
+        const blobUrl = resolvedBlobs[index];
+        // Escape seguro para regex
+        const escapedImp = imp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        code = code.replace(new RegExp(`(['"])${escapedImp}\\1`, 'g'), `$1${blobUrl}$1`);
+      });
+
+      // Transpilação Babel (Preset igual ao código 1 para garantir compatibilidade)
+      const transformed = Babel.transform(code, {
         presets: [
-          ['react', { runtime: 'automatic' }], 
-          ['typescript', { isTSX: true, allExtensions: true }]
+          ['react', { runtime: 'automatic' }],
+          ['typescript', { allExtensions: true, isTSX: true }]
         ],
         filename: url,
         sourceType: 'module'
-      }).code;
+      });
 
-      const blobUrl = URL.createObjectURL(new Blob([transpiled], { type: 'application/javascript' }));
+      const blobUrl = URL.createObjectURL(
+        new Blob([transformed.code], { type: 'application/javascript' })
+      );
+
       blobCache.set(url, blobUrl);
       return blobUrl;
     }
 
-    // === INICIALIZAÇÃO ===
+    // 4. Inicialização
     (async () => {
       try {
-        const entry = await transpile('/index.tsx');
+        const entry = await resolveAndTranspile('/index.tsx');
         await import(entry);
       } catch (err) {
-        console.error('Erro Fatal:', err);
+        console.error('Erro ao iniciar app:', err);
         document.getElementById('root').innerHTML = `
-          <div style="padding:40px; text-align:center; color:#ff6b6b; background:#1a0505; margin:20px; border-radius:8px; border:1px solid #ff3333;">
-            <h2 style="margin-bottom:10px">Falha ao Carregar Aplicação</h2>
-            <p style="font-family:monospace">${err.message}</p>
-          </div>`;
+          <div style="padding:40px; text-align:center; color:#ff6b6b; font-family:sans-serif;">
+            <h2 style="font-size:24px; margin-bottom:10px;">Erro ao carregar aplicação</h2>
+            <p style="background:rgba(255,0,0,0.1); padding:15px; border-radius:8px; display:inline-block;">${err.message}</p>
+          </div>
+        `;
       }
     })();
   </script>
