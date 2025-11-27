@@ -1,241 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#020617" />
-  <title>AllFines | Premium Audio</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Space Grotesk', 'sans-serif'],
-          },
-          colors: {
-            agency: {
-              yellow: '#FFD700',
-              black: '#0a0a0a',
-              dark: '#020617',
-              slate: '#1e293b',
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AllFines | Premium Audio</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+            },
+            colors: {
+              agency: {
+                yellow: '#FFD700',
+                black: '#0a0a0a',
+                dark: '#020617',
+                slate: '#1e293b',
+              }
+            },
+            animation: {
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
             }
-          },
-          keyframes: {
-            'reveal-word': {
-              from: { opacity: '0', transform: 'translateY(10px)' },
-              to:   { opacity: '1', transform: 'translateY(0)' },
-            },
-            'letter-reveal': {
-              '0%':   { opacity: 0, transform: 'translateY(20px) scale(0.8)' },
-              '100%': { opacity: 1, transform: 'translateY(0) scale(1)' },
-            },
-            'logo-bar-1': {
-              '0%':   { transform: 'translateY(-40px)', opacity: 0 },
-              '100%': { transform: 'translateY(0)', opacity: 1 },
-            },
-            'logo-bar-2': {
-              '0%':   { transform: 'translateY(40px)', opacity: 0 },
-              '100%': { transform: 'translateY(0)', opacity: 1 },
-            },
-            'blob-animation': {
-              '0%':   { transform: 'translate(0px, 0px) scale(1)' },
-              '33%':  { transform: 'translate(30px, -50px) scale(1.1)' },
-              '66%':  { transform: 'translate(-20px, 20px) scale(0.9)' },
-              '100%': { transform: 'translate(0px, 0px) scale(1)' },
-            },
-            'fade-in': {
-              from: { opacity: 0 },
-              to:   { opacity: 1 },
-            },
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
-          },
-          animation: {
-            'reveal-word': 'reveal-word 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'letter-reveal': 'letter-reveal 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'logo-bar-1': 'logo-bar-1 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'logo-bar-2': 'logo-bar-2 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'blob': 'blob-animation 20s infinite ease-in-out',
-            'fade-in': 'fade-in 0.3s ease-in-out',
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
           }
         }
-      },
-      plugins: [
-        function ({ addUtilities }) {
-          addUtilities({
-            '.scrollbar-hide': {
-              '-ms-overflow-style': 'none',
-              'scrollbar-width': 'none',
-              '&::-webkit-scrollbar': { display: 'none' }
-            }
-          })
-        }
-      ]
-    }
-  </script>
-
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
-
-  <!-- Import map das libs -->
-  <script type="importmap">
+      }
+    </script>
+    
+    <!-- Babel Standalone para transpilação TSX/TS -->
+    <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+    
+    <!-- Import map das libs (original do AllFines) -->
+    <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-    "@google/genai": "https://esm.sh/@google/genai@0.14.0",
-    "lucide-react": "https://esm.sh/lucide-react@0.453.0"
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
 }
-</script>
-
-  <style>
-    html { overflow-y: auto; }
-    body {
-      background-color: #020617;
-      color: white;
-    }
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #020617; 
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155; 
-      border-radius: 0px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #FFD700; 
-    }
-  </style>
-
-  <!-- Pré-carrega o entry (ajuda um pouco no tempo total) -->
-  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
-</head>
-<body class="bg-[#020617] text-white font-sans">
-  <noscript>Você precisa habilitar o JavaScript para rodar esta aplicação.</noscript>
-  <div id="root"></div>
-
-  <script type="module">
-    const blobCache = new Map();
-
-    // Carrega o arquivo TS/TSX, tentando extensões padrão (.tsx, .ts, /index.tsx, /index.ts)
-    async function loadSource(path, parentUrl) {
-      const baseUrl = new URL(path, parentUrl).href;
-
-      // Se já tem extensão, tenta direto
-      if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
-        const res = await fetch(baseUrl);
-        if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
-        return { absoluteUrl: baseUrl, sourceCode: await res.text() };
+    </script>
+    
+    <style>
+      body {
+        background-color: #020617;
+        color: white;
       }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #020617; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155; 
+        border-radius: 0px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #FFD700; 
+      }
+    </style>
+    
+    <!-- Pré-carrega o entry point -->
+    <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
+  </head>
+  <body>
+    <noscript>Você precisa habilitar o JavaScript para rodar esta aplicação.</noscript>
+    <div id="root"></div>
 
-      const base = baseUrl.replace(/\/$/, '');
-      const candidates = [
-        base + '.tsx',
-        base + '.ts',
-        base + '/index.tsx',
-        base + '/index.ts',
-      ];
+    <script type="module">
+      const blobCache = new Map();
 
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            return { absoluteUrl: url, sourceCode: await res.text() };
+      // Carrega arquivo TS/TSX com resolução automática de extensões
+      async function loadSource(path, parentUrl) {
+        const baseUrl = new URL(path, parentUrl).href;
+
+        // Se já tem extensão, tenta direto
+        if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
+          const res = await fetch(baseUrl);
+          if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
+          return { absoluteUrl: baseUrl, sourceCode: await res.text() };
+        }
+
+        const base = baseUrl.replace(/\/$/, '');
+        const candidates = [
+          base + '.tsx',
+          base + '.ts',
+          base + '/index.tsx',
+          base + '/index.ts',
+        ];
+
+        for (const url of candidates) {
+          try {
+            const res = await fetch(url);
+            if (res.ok) {
+              return { absoluteUrl: url, sourceCode: await res.text() };
+            }
+          } catch (_) {
+            // ignora, tenta próximo
           }
-        } catch (_) {
-          // ignora, tenta o próximo
         }
+
+        throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
       }
 
-      throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
-    }
+      async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
+        // 1) Descobre o arquivo real e lê código-fonte
+        const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
 
-    async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
-      // 1) Descobre o arquivo real (.tsx/.ts) e lê o código-fonte
-      const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
-
-      // Cache por arquivo real (URL com extensão)
-      if (blobCache.has(absoluteUrl)) {
-        return blobCache.get(absoluteUrl);
-      }
-
-      // 2) Descobre imports relativos (somente "import ... from '...';")
-      const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
-      const dependencies = new Map();
-      let match;
-      while ((match = importRegex.exec(sourceCode)) !== null) {
-        const depPath = match[1];
-        if (depPath.startsWith('.')) {
-          dependencies.set(depPath, null);
+        // Cache por URL real
+        if (blobCache.has(absoluteUrl)) {
+          return blobCache.get(absoluteUrl);
         }
+
+        // 2) Descobre imports relativos
+        const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
+        const dependencies = new Map();
+        let match;
+        while ((match = importRegex.exec(sourceCode)) !== null) {
+          const depPath = match[1];
+          if (depPath.startsWith('.')) {
+            dependencies.set(depPath, null);
+          }
+        }
+
+        // 3) Resolve recursivamente em paralelo
+        await Promise.all(
+          Array.from(dependencies.keys()).map(async (depPath) => {
+            const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
+            dependencies.set(depPath, childBlobUrl);
+          })
+        );
+
+        // 4) Reescreve imports locais para blobs
+        let transformedCode = sourceCode;
+        for (const [originalPath, blobUrl] of dependencies.entries()) {
+          const re = new RegExp(`(['"])${originalPath}\\1`, 'g');
+          transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
+        }
+
+        // 5) Transpila TSX -> JS com Babel
+        const { code } = Babel.transform(transformedCode, {
+          presets: [
+            ['react', { runtime: 'automatic' }],
+            ['typescript', { allExtensions: true, isTSX: true }]
+          ],
+          sourceType: 'module',
+          filename: absoluteUrl
+        });
+
+        // 6) Cria Blob URL e guarda em cache
+        const blobUrl = URL.createObjectURL(
+          new Blob([code], { type: 'application/javascript' })
+        );
+
+        blobCache.set(absoluteUrl, blobUrl);
+        return blobUrl;
       }
 
-      // 3) Resolve recursivamente as dependências em paralelo
-      await Promise.all(
-        Array.from(dependencies.keys()).map(async (depPath) => {
-          const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
-          dependencies.set(depPath, childBlobUrl);
-        })
-      );
-
-      // 4) Reescreve os imports locais para apontar para os blobs
-      let transformedCode = sourceCode;
-      for (const [originalPath, blobUrl] of dependencies.entries()) {
-        const re = new RegExp(`(['"])${originalPath}\\1`, 'g');
-        transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
-      }
-
-      // 5) Transpila TSX -> JS com Babel (React + TypeScript)
-      const { code } = Babel.transform(transformedCode, {
-        presets: [
-          ['react', { runtime: 'automatic' }],
-          ['typescript', { allExtensions: true, isTSX: true }]
-        ],
-        sourceType: 'module',
-        filename: absoluteUrl
-      });
-
-      // 6) Cria um Blob URL para esse módulo e guarda em cache
-      const blobUrl = URL.createObjectURL(
-        new Blob([code], { type: 'application/javascript' })
-      );
-
-      blobCache.set(absoluteUrl, blobUrl);
-      return blobUrl;
-    }
-
-    (async () => {
-      try {
-        // Entrada da app: ajuste aqui se seu entry não for /index.tsx
-        const entryModuleUrl = await resolveAndTranspile('/index.tsx');
-        await import(entryModuleUrl);
-      } catch (error) {
-        console.error('Falha ao inicializar a aplicação:', error);
-        const rootEl = document.getElementById('root');
-        rootEl.innerHTML =
-          `<div style="color:#ff8b8b; background:#2b0f0f; padding:20px; border-radius:8px; font-family:monospace; white-space:pre-wrap;">
-             <h2>Erro na Aplicação</h2>
-             <p>${error.message}</p>
-           </div>`;
-      }
-    })();
-  </script>
-</body>
+      // Inicialização
+      (async () => {
+        try {
+          const entryModuleUrl = await resolveAndTranspile('/index.tsx');
+          await import(entryModuleUrl);
+        } catch (error) {
+          console.error('Falha ao inicializar a aplicação:', error);
+          const rootEl = document.getElementById('root');
+          rootEl.innerHTML =
+            `<div style="color:#ff8b8b; background:#2b0f0f; padding:20px; border-radius:8px; font-family:monospace; white-space:pre-wrap;">
+               <h2>Erro na Aplicação</h2>
+               <p>${error.message}</p>
+             </div>`;
+        }
+      })();
+    </script>
+  </body>
 </html>
