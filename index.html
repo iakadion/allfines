@@ -4,14 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AllFines | Premium Audio</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CDN -->
+
+    <!-- Tailwind (original AllFines) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -22,9 +18,9 @@
             },
             colors: {
               agency: {
-                yellow: '#FFD700',
+                yellow: '#FFD700', // Gold/Yellow
                 black: '#0a0a0a',
-                dark: '#020617',
+                dark: '#020617',  // Very dark blue
                 slate: '#1e293b',
               }
             },
@@ -42,12 +38,15 @@
         }
       }
     </script>
-    
+
+    <!-- Estilos originais AllFines -->
     <style>
+      html { overflow-y: auto; } /* mesmo comportamento do código 1 */
       body {
         background-color: #020617;
         color: white;
       }
+      /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 6px;
       }
@@ -63,38 +62,50 @@
       }
     </style>
 
-    <!-- Babel Standalone -->
+    <!-- Import map ORIGINAL do AllFines (mantido) -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+      }
+    }
+    </script>
+
+    <!-- Babel Standalone (do código 1) -->
     <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
-    <!-- Import map das libs -->
-    <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-    "lucide-react": "https://esm.sh/lucide-react@0.555.0",
-    "@google/genai": "https://esm.sh/@google/genai@0.14.0"
-  }
-}
-</script>
-
-    <!-- Pré-carrega o entry -->
+    <!-- Preload do entry /index.tsx (otimização de tempo) -->
     <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
   </head>
+
   <body>
-    <noscript>You need to enable JavaScript to run this application.</noscript>
+    <noscript>Você precisa habilitar o JavaScript para rodar esta aplicação.</noscript>
     <div id="root"></div>
 
+    <!-- Transpilação TS/TSX no navegador (adaptado do código 1, sem perder funcionalidade) -->
     <script type="module">
+      // Stub simples para evitar erro "process is not defined" no browser
+      // (caso algum código use process.env.*)
+      if (typeof globalThis.process === "undefined") {
+        globalThis.process = { env: {} };
+      } else if (!globalThis.process.env) {
+        globalThis.process.env = {};
+      }
+
       const blobCache = new Map();
 
+      // Carrega o arquivo TS/TSX, tentando extensões padrão (.tsx, .ts, /index.tsx, /index.ts)
       async function loadSource(path, parentUrl) {
         const baseUrl = new URL(path, parentUrl).href;
 
+        // Se já tem extensão, tenta direto
         if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
           const res = await fetch(baseUrl);
-          if (!res.ok) throw new Error('Could not load ' + baseUrl);
+          if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
           return { absoluteUrl: baseUrl, sourceCode: await res.text() };
         }
 
@@ -112,19 +123,24 @@
             if (res.ok) {
               return { absoluteUrl: url, sourceCode: await res.text() };
             }
-          } catch (_) {}
+          } catch (_) {
+            // ignora, tenta o próximo
+          }
         }
 
-        throw new Error('Could not find file for ' + baseUrl);
+        throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
       }
 
       async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
+        // 1) Descobre o arquivo real (.tsx/.ts) e lê o código-fonte
         const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
 
+        // Cache por arquivo real (URL com extensão)
         if (blobCache.has(absoluteUrl)) {
           return blobCache.get(absoluteUrl);
         }
 
+        // 2) Descobre imports relativos (somente "import ... from '...';")
         const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
         const dependencies = new Map();
         let match;
@@ -135,6 +151,7 @@
           }
         }
 
+        // 3) Resolve recursivamente as dependências em paralelo
         await Promise.all(
           Array.from(dependencies.keys()).map(async (depPath) => {
             const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
@@ -142,12 +159,14 @@
           })
         );
 
+        // 4) Reescreve os imports locais para apontar para os blobs
         let transformedCode = sourceCode;
         for (const [originalPath, blobUrl] of dependencies.entries()) {
           const re = new RegExp(`(['"])${originalPath}\\1`, 'g');
           transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
         }
 
+        // 5) Transpila TSX -> JS com Babel (React + TypeScript)
         const { code } = Babel.transform(transformedCode, {
           presets: [
             ['react', { runtime: 'automatic' }],
@@ -157,6 +176,7 @@
           filename: absoluteUrl
         });
 
+        // 6) Cria um Blob URL para esse módulo e guarda em cache
         const blobUrl = URL.createObjectURL(
           new Blob([code], { type: 'application/javascript' })
         );
@@ -167,13 +187,15 @@
 
       (async () => {
         try {
+          // Entrada da app: /index.tsx (conforme você comentou)
           const entryModuleUrl = await resolveAndTranspile('/index.tsx');
           await import(entryModuleUrl);
         } catch (error) {
-          console.error('Failed to initialize application:', error);
-          document.getElementById('root').innerHTML =
+          console.error('Falha ao inicializar a aplicação:', error);
+          const rootEl = document.getElementById('root');
+          rootEl.innerHTML =
             `<div style="color:#ff8b8b; background:#2b0f0f; padding:20px; border-radius:8px; font-family:monospace; white-space:pre-wrap;">
-               <h2>Application Error</h2>
+               <h2>Erro na Aplicação</h2>
                <p>${error.message}</p>
              </div>`;
         }
