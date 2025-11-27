@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AllFines | Premium Audio</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Preload para acelerar o carregamento da lib de ícones pesada -->
+  <link rel="modulepreload" href="https://esm.sh/lucide-react@0.555.0" />
+
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
-  <!-- PRELOAD CRÍTICO -->
-  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
-  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -45,24 +42,10 @@
     ::-webkit-scrollbar-track { background: #020617; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
     ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
-    
-    /* Loading indicator */
-    #root:empty::after {
-      content: '';
-      display: block;
-      width: 40px;
-      height: 40px;
-      margin: 100px auto;
-      border: 3px solid #334155;
-      border-top-color: #FFD700;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 
-  <!-- Babel - versão mais leve -->
-  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+  <!-- Babel mais recente -->
+  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 
   <script type="importmap">
   {
@@ -82,102 +65,96 @@
   <div id="root"></div>
 
   <script type="module">
-    // Polyfill global
+    // === POLYFILL CRÍTICO ===
+    // Define process.env globalmente para que bibliotecas React funcionem rápido sem erros
     globalThis.process = { env: { NODE_ENV: 'production' } };
 
     const blobCache = new Map();
-    const fetchCache = new Map();
 
-    // Cache de fetch pra não buscar o mesmo arquivo 2x
-    async function cachedFetch(url) {
-      if (fetchCache.has(url)) return fetchCache.get(url);
-      const promise = fetch(url).then(r => r.ok ? r.text() : Promise.reject(`404: ${url}`));
-      fetchCache.set(url, promise);
-      return promise;
-    }
-
+    // Carrega o código fonte tentando várias extensões EM PARALELO (Muito mais rápido)
     async function loadSource(path, parentUrl) {
-      const base = new URL(path, parentUrl).href.replace(/\/$/, '');
-      
-      // Se já tem extensão
-      if (/\.(tsx?|jsx?)$/i.test(base)) {
-        return { url: base, source: await cachedFetch(base) };
-      }
-      
-      // Tenta extensões em paralelo (mais rápido!)
-      const candidates = [base + '.tsx', base + '.ts', base + '/index.tsx', base + '/index.ts'];
-      const results = await Promise.allSettled(candidates.map(u => cachedFetch(u).then(s => ({ url: u, source: s }))));
-      
-      const found = results.find(r => r.status === 'fulfilled');
-      if (found) return found.value;
-      
-      throw new Error(`Arquivo não encontrado: ${path}`);
-    }
+      const baseUrl = new URL(path, parentUrl).href;
 
-    async function transpile(path, parentUrl = location.href) {
-      const { url, source } = await loadSource(path, parentUrl);
-      
-      // CHECK CACHE PRIMEIRO (antes de processar qualquer coisa)
-      if (blobCache.has(url)) return blobCache.get(url);
-
-      // Extrai imports locais
-      const importRegex = /\bimport\s+[^'"]*['"](\.[^'"]+)['"]/g;
-      const deps = new Map();
-      let match;
-      while ((match = importRegex.exec(source)) !== null) {
-        deps.set(match[1], null);
+      // Se já tem extensão explícita, vai direto
+      if (/\.(tsx?|jsx?)$/i.test(baseUrl)) {
+        const res = await fetch(baseUrl);
+        if (!res.ok) throw new Error(`404: ${baseUrl}`);
+        return { url: baseUrl, source: await res.text() };
       }
 
-      // Resolve dependências em paralelo
-      await Promise.all(
-        [...deps.keys()].map(async dep => {
-          deps.set(dep, await transpile(dep, url));
-        })
+      // Se não tem extensão (ex: import Button from './Button'), testa todas ao mesmo tempo
+      const extensions = ['.tsx', '.ts', '/index.tsx', '/index.ts'];
+      const candidates = extensions.map(ext => baseUrl + ext);
+
+      // Dispara todas as requisições simultaneamente
+      const results = await Promise.all(
+        candidates.map(url => 
+          fetch(url).then(res => ({ url, res })).catch(() => ({ url, res: { ok: false } }))
+        )
       );
 
-      // Substitui imports (método mais rápido)
+      // Pega a primeira que deu certo (status 200)
+      const found = results.find(r => r.res.ok);
+      
+      if (found) {
+        return { url: found.url, source: await found.res.text() };
+      }
+
+      throw new Error(`Arquivo não encontrado: ${path} (Tentado: .tsx, .ts, index...)`);
+    }
+
+    async function transpile(path, parentUrl = import.meta.url) {
+      const { url, source } = await loadSource(path, parentUrl);
+      
+      if (blobCache.has(url)) return blobCache.get(url);
+
+      // Detecta imports locais (iniciados com ./ ou ../)
+      const localImports = [...source.matchAll(/\bimport\s+[^'"]*['"]((\.{1,2}[^'"]*))['"]/g)].map(m => m[1]);
       let code = source;
-      for (const [dep, blob] of deps) {
-        code = code.split(`'${dep}'`).join(`'${blob}'`);
-        code = code.split(`"${dep}"`).join(`"${blob}"`);
+
+      // Resolve dependências recursivamente em paralelo
+      if (localImports.length) {
+        const blobs = await Promise.all(localImports.map(imp => transpile(imp, url)));
+        localImports.forEach((imp, i) => {
+          // Escapa caracteres especiais para o regex
+          const esc = imp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          // Substitui o import original pelo Blob URL
+          code = code.replace(new RegExp(`(['"])${esc}\\1`, 'g'), `$1${blobs[i]}$1`);
+        });
       }
 
-      // Patches só se necessário
-      if (code.includes('@google/genai')) {
-        code = code.replace(/from\s+['"]@google\/genai['"]/g, 'from "@google/generative-ai"');
-      }
-      if (code.includes('GoogleGenAI')) {
-        code = code.replace(/\bGoogleGenAI\b/g, 'GoogleGenerativeAI');
-      }
+      // === PATCHES LEVES ===
+      // Apenas corrige nomes de pacotes específicos. 
+      // O process.env foi removido daqui pois o Polyfill no topo já resolve.
+      code = code
+        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
+        .replace(/GoogleGenAI/g, 'GoogleGenerativeAI');
 
-      // Transpila
-      const { code: transpiled } = Babel.transform(code, {
+      const transpiled = Babel.transform(code, {
         presets: [
-          ['react', { runtime: 'automatic' }],
+          ['react', { runtime: 'automatic' }], 
           ['typescript', { isTSX: true, allExtensions: true }]
         ],
         filename: url,
         sourceType: 'module'
-      });
+      }).code;
 
       const blobUrl = URL.createObjectURL(new Blob([transpiled], { type: 'application/javascript' }));
       blobCache.set(url, blobUrl);
       return blobUrl;
     }
 
-    // START
+    // === INICIALIZAÇÃO ===
     (async () => {
       try {
-        const t0 = performance.now();
         const entry = await transpile('/index.tsx');
-        console.log(`⚡ Transpilado em ${(performance.now() - t0).toFixed(0)}ms`);
         await import(entry);
       } catch (err) {
-        console.error('Erro:', err);
+        console.error('Erro Fatal:', err);
         document.getElementById('root').innerHTML = `
-          <div style="padding:60px 20px; text-align:center; font-family:system-ui; color:#ff3366; background:#1a0000; margin:30px auto; max-width:700px; border-radius:16px; border:2px solid #440000;">
-            <h2>AllFines – Erro</h2>
-            <p>${err.message || err}</p>
+          <div style="padding:40px; text-align:center; color:#ff6b6b; background:#1a0505; margin:20px; border-radius:8px; border:1px solid #ff3333;">
+            <h2 style="margin-bottom:10px">Falha ao Carregar Aplicação</h2>
+            <p style="font-family:monospace">${err.message}</p>
           </div>`;
       }
     })();
