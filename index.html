@@ -56,34 +56,29 @@
       }
     </style>
 
-    <!-- Polyfill para process.env (ANTES de tudo) -->
-    <script>
-      window.process = { env: { NODE_ENV: 'production' } };
-    </script>
-
-    <!-- Babel Standalone -->
+    <!-- Babel Standalone (ADICIONADO) -->
     <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
-    <!-- Import map ORIGINAL do AllFines -->
+    <!-- Import map ORIGINAL do AllFines (NÃO ALTERADO) -->
     <script type="importmap">
 {
   "imports": {
     "@google/genai": "https://esm.sh/@google/genai@0.14.0",
     "react": "https://esm.sh/react@18.2.0",
-    "react/": "https://esm.sh/react@18.2.0/",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
     "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-    "lucide-react": "https://esm.sh/lucide-react@0.555.0?external=react"
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.469.0?external=react"
   }
 }
 </script>
 
-    <!-- Pré-carrega o entry -->
+    <!-- Pré-carrega o entry (ADICIONADO) -->
     <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
   </head>
   <body>
     <div id="root"></div>
 
+    <!-- Script de Transpilação (ADICIONADO - copiado do código 1) -->
     <script type="module">
       const blobCache = new Map();
 
