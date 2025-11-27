@@ -4,8 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AllFines | Premium Audio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -36,6 +42,7 @@
         }
       }
     </script>
+    
     <style>
       body {
         background-color: #020617;
@@ -56,29 +63,29 @@
       }
     </style>
 
-    <!-- Babel Standalone (ADICIONADO) -->
+    <!-- Babel Standalone -->
     <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
-    <!-- Import map ORIGINAL do AllFines (NÃO ALTERADO) -->
+    <!-- Import map das libs -->
     <script type="importmap">
 {
   "imports": {
-    "@google/genai": "https://esm.sh/@google/genai@0.14.0",
     "react": "https://esm.sh/react@18.2.0",
-    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.469.0?external=react"
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "lucide-react": "https://esm.sh/lucide-react@0.555.0",
+    "@google/genai": "https://esm.sh/@google/genai@0.14.0"
   }
 }
 </script>
 
-    <!-- Pré-carrega o entry (ADICIONADO) -->
+    <!-- Pré-carrega o entry -->
     <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
   </head>
   <body>
+    <noscript>You need to enable JavaScript to run this application.</noscript>
     <div id="root"></div>
 
-    <!-- Script de Transpilação (ADICIONADO - copiado do código 1) -->
     <script type="module">
       const blobCache = new Map();
 
@@ -87,7 +94,7 @@
 
         if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
           const res = await fetch(baseUrl);
-          if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
+          if (!res.ok) throw new Error('Could not load ' + baseUrl);
           return { absoluteUrl: baseUrl, sourceCode: await res.text() };
         }
 
@@ -108,7 +115,7 @@
           } catch (_) {}
         }
 
-        throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
+        throw new Error('Could not find file for ' + baseUrl);
       }
 
       async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
@@ -163,10 +170,10 @@
           const entryModuleUrl = await resolveAndTranspile('/index.tsx');
           await import(entryModuleUrl);
         } catch (error) {
-          console.error('Falha ao inicializar a aplicação:', error);
+          console.error('Failed to initialize application:', error);
           document.getElementById('root').innerHTML =
             `<div style="color:#ff8b8b; background:#2b0f0f; padding:20px; border-radius:8px; font-family:monospace; white-space:pre-wrap;">
-               <h2>Erro na Aplicação</h2>
+               <h2>Application Error</h2>
                <p>${error.message}</p>
              </div>`;
         }
