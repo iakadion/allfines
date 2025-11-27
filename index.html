@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AllFines | Premium Audio</title>
 
-  <!-- Tailwind + fontes -->
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -40,43 +44,30 @@
   </script>
 
   <style>
-    body {
-      background-color: #020617;
-      color: white;
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #020617;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 0px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #FFD700;
-    }
+    html { overflow-y: auto; }
+    body { background-color: #020617; color: white; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
   </style>
 
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
-  <!-- Import map (React + lucide + Google GenAI) -->
+  <!-- Import Map - CORRIGIDO -->
   <script type="importmap">
   {
     "imports": {
-      "react": "https://esm.sh/react@18.3.1",
-      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
-      "lucide-react": "https://esm.sh/lucide-react@0.555.0",
-      "@google/genai": "https://esm.sh/@google/generative-ai@0.21.0",
-      "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.21.0"
+      "react": "https://esm.sh/react@18.2.0",
+      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+      "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+      "lucide-react": "https://esm.sh/lucide-react@0.454.0?external=react"
     }
   }
   </script>
 
-  <!-- Pré-carrega o entry (melhora um pouco o tempo de carregamento) -->
+  <!-- Preload -->
   <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
 </head>
 
@@ -85,17 +76,15 @@
   <div id="root"></div>
 
   <script type="module">
-    // Polyfill básico de process para libs que esperam Node
-    globalThis.process = { env: { NODE_ENV: 'production' } };
+    // Polyfill para process.env
+    globalThis.process = globalThis.process || { env: {} };
 
     const blobCache = new Map();
 
-    // Carrega o arquivo TS/TSX, tentando extensões padrão (.tsx, .ts, /index.tsx, /index.ts)
     async function loadSource(path, parentUrl) {
       const baseUrl = new URL(path, parentUrl).href;
 
-      // Se já tem extensão, tenta direto
-      if (/\.(tsx?|jsx?)($|\?)/i.test(baseUrl)) {
+      if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
         const res = await fetch(baseUrl);
         if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
         return { absoluteUrl: baseUrl, sourceCode: await res.text() };
@@ -106,7 +95,7 @@
         base + '.tsx',
         base + '.ts',
         base + '/index.tsx',
-        base + '/index.ts'
+        base + '/index.ts',
       ];
 
       for (const url of candidates) {
@@ -115,24 +104,20 @@
           if (res.ok) {
             return { absoluteUrl: url, sourceCode: await res.text() };
           }
-        } catch (_) {
-          // ignora, tenta o próximo
-        }
+        } catch (_) {}
       }
 
       throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
     }
 
     async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
-      // 1) Descobre o arquivo real (.tsx/.ts) e lê o código-fonte
       const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
 
-      // Cache por arquivo real (URL com extensão)
       if (blobCache.has(absoluteUrl)) {
         return blobCache.get(absoluteUrl);
       }
 
-      // 2) Descobre imports relativos (somente "import ... from '...';")
+      // Descobre imports relativos
       const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
       const dependencies = new Map();
       let match;
@@ -143,7 +128,7 @@
         }
       }
 
-      // 3) Resolve recursivamente as dependências em paralelo
+      // Resolve dependências em paralelo
       await Promise.all(
         Array.from(dependencies.keys()).map(async (depPath) => {
           const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
@@ -151,23 +136,14 @@
         })
       );
 
-      // 4) Reescreve os imports locais para apontar para os blobs
+      // Reescreve imports locais
       let transformedCode = sourceCode;
       for (const [originalPath, blobUrl] of dependencies.entries()) {
         const re = new RegExp(`(['"])${originalPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\1`, 'g');
         transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
       }
 
-      // 4.1) PATCHES específicos do AllFines / Google GenAI
-      transformedCode = transformedCode
-        // troca o módulo do AI Studio pelo pacote oficial
-        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
-        // classe antiga → nova
-        .replace(/GoogleGenAI/g, 'GoogleGenerativeAI')
-        // uso de process.env no código do app
-        .replace(/\bprocess\.env\b/g, 'import.meta.env || {}');
-
-      // 5) Transpila TSX -> JS com Babel (React + TypeScript)
+      // Transpila
       const { code } = Babel.transform(transformedCode, {
         presets: [
           ['react', { runtime: 'automatic' }],
@@ -177,7 +153,6 @@
         filename: absoluteUrl
       });
 
-      // 6) Cria um Blob URL para esse módulo e guarda em cache
       const blobUrl = URL.createObjectURL(
         new Blob([code], { type: 'application/javascript' })
       );
@@ -187,26 +162,16 @@
     }
 
     (async () => {
-      const rootEl = document.getElementById('root');
-      // Mensagem de loading enquanto transpila
-      rootEl.innerHTML = `
-        <div style="padding:40px; text-align:center; font-family:system-ui; color:#ffffffb3;">
-          Carregando aplicação AllFines (transpilando TypeScript no navegador)...
-        </div>
-      `;
-
       try {
-        // Se o entry não for /index.tsx, troque aqui:
         const entryModuleUrl = await resolveAndTranspile('/index.tsx');
         await import(entryModuleUrl);
       } catch (error) {
-        console.error('Falha ao inicializar a aplicação AllFines:', error);
-        rootEl.innerHTML =
-          `<div style="padding:60px 20px; text-align:center; font-family:system-ui; color:#ff3366; background:#1a0000; margin:30px auto; max-width:700px; border-radius:16px; border:2px solid #440000;">
-             <h2>AllFines – Erro Fatal</h2>
-             <p style="font-size:1.2em;">${error.message}</p>
-             <small>Abra o console (F12) para ver detalhes.</small>
-           </div>`;
+        console.error('Erro ao iniciar:', error);
+        document.getElementById('root').innerHTML = `
+          <div style="color:#ff8b8b; background:#2b0f0f; padding:20px; border-radius:8px; font-family:monospace; white-space:pre-wrap; margin:20px;">
+            <h2>Erro na Aplicação</h2>
+            <p>${error.message}</p>
+          </div>`;
       }
     })();
   </script>
