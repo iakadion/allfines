@@ -43,7 +43,6 @@
 
   <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 
-  <!-- IMPORTMAP COM ALIAS FORÇADO (a mágica acontece aqui) -->
   <script type="importmap">
   {
     "imports": {
@@ -51,8 +50,6 @@
       "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
       "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
       "lucide-react": "https://esm.sh/lucide-react@0.555.0",
-
-      /* FORÇA QUALQUER @google/genai → virar @google/generative-ai (funciona 100%) */
       "@google/genai": "https://esm.sh/@google/generative-ai@0.21.0",
       "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.21.0"
     }
@@ -71,59 +68,64 @@
       if (/\.(tsx?|jsx?)($|\?)/i.test(url)) {
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Não encontrado: ${url}`);
-        return { url, code: await res.text() };
+        return { url, source: await res.text() };
       }
-
-      const candidates = [`${url}.tsx`, `${url}.ts`, `${url}/index.tsx`, `${url}/index.ts`];
+      const candidates = [url + '.tsx', url + '.ts', url + '/index.tsx', url + '/index.ts'];
       for (const c of candidates) {
-        try {
-          const res = await fetch(c);
-          if (res.ok) return { url: c, code: await res.text() };
-        } catch {}
+        const res = await fetch(c);
+        if (res.ok) return { url: c, source: await res.text() };
       }
       throw new Error(`Arquivo não encontrado: ${path}`);
     }
 
-    async function transpile(filePath, parentUrl = import.meta.url) {
-      const { url, code } = await loadSource(filePath, parentUrl);
+    async function transpile(path, parentUrl = import.meta.url) {
+      const { url, source } = await loadSource(path, parentUrl);
       if (blobCache.has(url)) return blobCache.get(url);
 
-      // Resolve imports locais
-      const localImports = [...code.matchAll(/\bimport\s+[^'"]*['"]((\.{1,2}\/[^'"]+))['"]/g)]
-        .map(m => m[1]);
+      // === RESOLVE IMPORTS LOCAIS ===
+      const localImportMatches = [...source.matchAll(/\bimport\s+[^'"]*['"]((\.{1,2}[^'"]+))['"]/g)];
+      const localImports = localImportMatches.map(m => m[1]);
 
-      await Promise.all(localImports.map(async imp => {
-        const blob = await transpile(imp, url);
-        code = code.replace(new RegExp(`(['"])${imp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\1`, 'g'), `$1${blob}$1`);
-      }));
+      let codeWithReplacedImports = source;
 
-      // PATCH AUTOMÁTICO: transforma @google/genai → @google/generative-ai no código
-      let finalCode = code
-        .replace(/@google\/genai/g, '@google/generative-ai')
+      if (localImports.length > 0) {
+        const blobUrls = await Promise.all(localImports.map(imp => transpile(imp, url)));
+        localImports.forEach((imp, i) => {
+          const escaped = imp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`(['"])${escaped}\\1`, 'g');
+          codeWithReplacedImports = codeWithReplacedImports.replace(regex, `$1${blobUrls[i]}$1`);
+        });
+      }
+
+      // === PATCH AUTOMÁTICO DO GOOGLE GENAI (sem tocar no seu código) ===
+      let finalSource = codeWithReplacedImports
+        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
         .replace(/GoogleGenAI/g, 'GoogleGenerativeAI');
 
-      const transpiled = Babel.transform(finalCode, {
+      // === TRANSPILE TSX → JS ===
+      const result = Babel.transform(finalSource, {
         presets: [['react', { runtime: 'automatic' }], ['typescript', { isTSX: true, allExtensions: true }]],
         filename: url,
         sourceType: 'module'
-      }).code;
+      });
 
-      const blobUrl = URL.createObjectURL(new Blob([transpiled], { type: 'application/javascript' }));
+      const blobUrl = URL.createObjectURL(new Blob([result.code], { type: 'application/javascript' }));
       blobCache.set(url, blobUrl);
       return blobUrl;
     }
 
+    // === INICIA A APLICAÇÃO ===
     (async () => {
       try {
         const entry = await transpile('/index.tsx');
         await import(entry);
       } catch (err) {
-        console.error(err);
+        console.error('AllFines erro fatal:', err);
         document.getElementById('root').innerHTML = `
-          <div style="padding:50px; text-align:center; font-family:system-ui; color:#ff5555; background:#1a0000; margin:30px; border-radius:16px;">
-            <h2>AllFines – Erro</h2>
-            <p>${err.message}</p>
-            <small>F12 → Console</small>
+          <div style="padding:60px 20px; text-align:center; font-family:system-ui; color:#ff5555; background:#1a0000; margin:30px auto; max-width:600px; border-radius:16px; border:1px solid #440000;">
+            <h2>AllFines – Erro Fatal</h2>
+            <p style="font-size:1.1em; margin:16px 0;">${err.message}</p>
+            <small>Abra o console (F12) para detalhes</small>
           </div>`;
       }
     })();
