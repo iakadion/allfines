@@ -1,136 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AllFines | Premium Audio</title>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0B071A" />
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SEO -->
+  <title>fillshy - Autonomous AI Content Pipeline</title>
+  <meta name="description" content="Generate diverse content 24/7 with AI and save it directly to your GitHub repository." />
   
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
-  <!-- Configuração Tailwind (Do seu código original) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN + Config -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
-            display: ['Space Grotesk', 'sans-serif'],
-          },
-          colors: {
-            agency: {
-              yellow: '#FFD700',
-              black: '#0a0a0a',
-              dark: '#020617',
-              slate: '#1e293b',
-            }
-          },
-          animation: {
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'fade-in': 'fadeIn 0.5s ease-out forwards',
+            heading: ['Sora', 'sans-serif'],
           },
           keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
+            'reveal-word': { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+            'letter-reveal': { '0%': { opacity: 0, transform: 'translateY(20px) scale(0.8)' }, '100%': { opacity: 1, transform: 'translateY(0) scale(1)' } },
+            'logo-bar-1': { '0%': { transform: 'translateY(-40px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+            'logo-bar-2': { '0%': { transform: 'translateY(40px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+            'blob-animation': {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            'fade-in': { from: { opacity: 0 }, to: { opacity: 1 } },
+          },
+          animation: {
+            'reveal-word': 'reveal-word 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'letter-reveal': 'letter-reveal 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'logo-bar-1': 'logo-bar-1 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'logo-bar-2': 'logo-bar-2 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'blob': 'blob-animation 20s infinite ease-in-out',
+            'fade-in': 'fade-in 0.3s ease-in-out',
           }
         }
-      }
+      },
+      plugins: [
+        function ({ addUtilities }) {
+          addUtilities({
+            '.scrollbar-hide': {
+              '-ms-overflow-style': 'none',
+              'scrollbar-width': 'none',
+              '&::-webkit-scrollbar': { display: 'none' }
+            }
+          })
+        }
+      ]
     }
   </script>
 
-  <style>
-    body { background-color: #020617; color: white; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #020617; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
-    ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
-    html { overflow-y: auto; }
-  </style>
-
-  <!-- Babel Standalone (Versão estável) -->
+  <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
-  <!-- Import Map Otimizado -->
+  <!-- Import map CORRIGIDO -->
   <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@18.2.0",
-      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-      "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-      "lucide-react": "https://esm.sh/lucide-react@0.300.0",
-      
-      <!-- Truque: Redireciona @google/genai para a lib Generative AI correta que funciona no browser -->
-      "@google/genai": "https://esm.sh/@google/generative-ai@0.1.3",
-      "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.1.3"
-    }
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    
+    "@google/genai": "https://esm.sh/@google/generative-ai@0.21.0",
+    "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.21.0"
   }
-  </script>
+}
+</script>
 
-  <!-- Preload para acelerar -->
-  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
+  <style>
+    html { overflow-y: auto; }
+  </style>
 </head>
-
-<body class="bg-agency-dark text-white font-sans">
+<body class="bg-[#0B071A] text-[#E0DDF0] font-sans">
   <div id="root"></div>
 
   <script type="module">
-    // 1. CORREÇÃO CRÍTICA PARA TELA AZUL (React precisa disso)
-    window.process = { env: { NODE_ENV: 'production' } };
+    // 1. CORREÇÃO DE POLYFILL (Evita a tela azul/branca se o código usar process.env)
+    globalThis.process = { env: { NODE_ENV: 'production' } };
 
     const blobCache = new Map();
 
-    // 2. BUSCA PARALELA (Resolve o "demorando abrir")
-    // Em vez de testar um por um, testa todos os caminhos possíveis ao mesmo tempo
     async function loadSource(path, parentUrl) {
       const baseUrl = new URL(path, parentUrl).href;
-
-      // Se já tem extensão, carrega direto
-      if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
-        const res = await fetch(baseUrl);
-        if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
-        return { absoluteUrl: baseUrl, sourceCode: await res.text() };
+      
+      // Tenta carregar com a extensão exata primeiro
+      if (/\.(tsx?|jsx?|js)($|\?)/.test(baseUrl)) {
+        try {
+            const res = await fetch(baseUrl);
+            if (!res.ok) throw new Error();
+            return { absoluteUrl: baseUrl, sourceCode: await res.text() };
+        } catch(e) {}
       }
 
-      // Candidatos a arquivo
+      // Tenta adivinhar as extensões se falhar
       const base = baseUrl.replace(/\/$/, '');
       const candidates = [
         base + '.tsx',
         base + '.ts',
         base + '/index.tsx',
         base + '/index.ts',
+        base + '.js',
+        base + '.jsx'
       ];
 
-      // Promise.any ou lógica manual de "primeiro que der certo"
-      // Isso faz ser muito mais rápido que o loop sequencial
-      const promises = candidates.map(url => 
-        fetch(url).then(async res => {
-          if (res.ok) return { absoluteUrl: url, sourceCode: await res.text() };
-          throw new Error('404');
-        })
-      );
-
-      try {
-        // Pega o primeiro que resolver (Promise.any é moderno, mas vamos usar uma lógica segura)
-        return await Promise.any(promises);
-      } catch (e) {
-        throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            return { absoluteUrl: url, sourceCode: await res.text() };
+          }
+        } catch (_) {}
       }
+      throw new Error('404: ' + baseUrl);
     }
 
     async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
-      // 1) Carrega o código (agora rápido)
+      // 1) Carrega o arquivo
       const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
 
       if (blobCache.has(absoluteUrl)) {
         return blobCache.get(absoluteUrl);
       }
 
-      // 2) Descobre imports
+      // 2) Identifica imports locais
       const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
       const dependencies = new Map();
       let match;
@@ -141,7 +145,7 @@
         }
       }
 
-      // 3) Resolve recursivamente
+      // 3) Carrega dependências em paralelo (mais rápido)
       await Promise.all(
         Array.from(dependencies.keys()).map(async (depPath) => {
           const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
@@ -149,19 +153,21 @@
         })
       );
 
-      // 4) Reescreve imports
+      // 4) Reescreve imports para Blobs
       let transformedCode = sourceCode;
+      
+      // Correção de código automática (O PATCH MÁGICO)
+      // Substitui a chamada antiga "GoogleGenAI" pela "GoogleGenerativeAI" do navegador
+      transformedCode = transformedCode
+        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
+        .replace(/\bGoogleGenAI\b/g, 'GoogleGenerativeAI');
+
       for (const [originalPath, blobUrl] of dependencies.entries()) {
         const re = new RegExp(`(['"])${originalPath}\\1`, 'g');
         transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
       }
 
-      // === CORREÇÃO GOOGLE GENAI ===
-      // Substitui "GoogleGenAI" (antigo/incorreto) por "GoogleGenerativeAI" (correto da lib)
-      // Isso corrige o erro: "does not provide an export named 'GoogleGenAI'"
-      transformedCode = transformedCode.replace(/\bGoogleGenAI\b/g, 'GoogleGenerativeAI');
-
-      // 5) Transpila com Babel (Igual ao seu código 1)
+      // 5) Babel
       const { code } = Babel.transform(transformedCode, {
         presets: [
           ['react', { runtime: 'automatic' }],
@@ -181,16 +187,15 @@
 
     (async () => {
       try {
-        const entryModuleUrl = await resolveAndTranspile('/index.tsx');
+        const entryModuleUrl = await resolveAndTranspile('/index.tsx'); // Certifique-se que seu arquivo inicial é index.tsx
         await import(entryModuleUrl);
       } catch (error) {
-        console.error('Falha ao inicializar a aplicação:', error);
-        const rootEl = document.getElementById('root');
-        rootEl.innerHTML =
-          `<div style="color:#ff8b8b; background:#2b0f0f; padding:20px; border-radius:8px; font-family:monospace; white-space:pre-wrap; margin: 20px;">
-             <h2 style="font-size: 1.5em; margin-bottom: 10px;">Erro na Aplicação</h2>
+        console.error('Crash Fatal:', error);
+        document.getElementById('root').innerHTML =
+          `<div style="color:#ff5555; background:#1a0000; padding:20px; font-family:monospace;">
+             <h2>Erro ao iniciar</h2>
              <p>${error.message}</p>
-             <p style="font-size: 0.8em; color: #aaa; margin-top:10px;">Verifique o console (F12) para mais detalhes.</p>
+             <p>Verifique o Console (F12) para detalhes.</p>
            </div>`;
       }
     })();
