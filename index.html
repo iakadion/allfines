@@ -1,193 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AllFines | Premium Audio</title>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllFines | Premium Audio</title>
 
-    <!-- 1. POLYFILL DE AMBIENTE (Resolve 'process is not defined') -->
-    <script>
-      // Cria o objeto process.env para que bibliotecas não quebrem
-      window.process = {
-        env: {
-          NODE_ENV: 'development',
-          // Se seu código usa algo como process.env.NEXT_PUBLIC_API_KEY, defina abaixo ou deixe vazio
-          REACT_APP_API_KEY: '', 
-        }
-      };
-    </script>
-
-    <!-- 2. VISUAL E DESIGN (AllFines Original) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              display: ['Space Grotesk', 'sans-serif'],
-            },
-            colors: {
-              agency: {
-                yellow: '#FFD700', 
-                black: '#0a0a0a',
-                dark: '#020617',  
-                slate: '#1e293b',
-              }
-            },
-            animation: {
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'fade-in': 'fadeIn 0.5s ease-out forwards',
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              }
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            agency: { yellow: '#FFD700', black: '#0a0a0a', dark: '#020617', slate: '#1e293b' }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
             }
           }
         }
       }
-    </script>
-
-    <style>
-      body {
-        background-color: #020617;
-        color: white;
-        overflow-y: auto;
-      }
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: #020617; }
-      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
-      ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
-    </style>
-
-    <!-- 3. FERRAMENTA DE TRANSPILAÇÃO (Igual ao Código 1) -->
-    <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
-
-    <!-- 4. IMPORT MAP CORRIGIDO -->
-    <!-- Resolvemos o conflito de nomes mapeando tudo para a biblioteca OFICIAL de Web -->
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-        
-        // Mapeamos ambas as tentativas de nome para a biblioteca generativa correta
-        "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.12.0",
-        "@google/genai": "https://esm.sh/@google/generative-ai@0.12.0",
-        
-        "lucide-react": "https://esm.sh/lucide-react@0.300.0"
-      }
     }
-    </script>
-    
-    <!-- Link de preload para performance -->
-    <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
-  </head>
-  <body>
-    <noscript>Habilite o JavaScript para usar o AllFines.</noscript>
-    <div id="root"></div>
+  </script>
 
-    <!-- 5. LÓGICA DE EXECUÇÃO MODULAR (Copiada do Código 1) -->
-    <script type="module">
-      const blobCache = new Map();
+  <style>
+    body { background-color: #020617; color: white; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
+  </style>
 
-      // Funções auxiliares de busca de arquivo
-      async function loadSource(path, parentUrl) {
-        const baseUrl = new URL(path, parentUrl).href;
+  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 
-        if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
-          const res = await fetch(baseUrl);
-          if (!res.ok) throw new Error('Falha ao carregar: ' + baseUrl);
-          return { absoluteUrl: baseUrl, sourceCode: await res.text() };
-        }
+  <!-- IMPORTMAP COM ALIAS FORÇADO (a mágica acontece aqui) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+      "lucide-react": "https://esm.sh/lucide-react@0.555.0",
 
-        const base = baseUrl.replace(/\/$/, '');
-        const candidates = [ base + '.tsx', base + '.ts', base + '/index.tsx', base + '/index.ts' ];
+      /* FORÇA QUALQUER @google/genai → virar @google/generative-ai (funciona 100%) */
+      "@google/genai": "https://esm.sh/@google/generative-ai@0.21.0",
+      "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.21.0"
+    }
+  }
+  </script>
+</head>
 
-        for (const url of candidates) {
-          try {
-            const res = await fetch(url);
-            if (res.ok) return { absoluteUrl: url, sourceCode: await res.text() };
-          } catch (_) {}
-        }
-        throw new Error('Arquivo não encontrado para: ' + baseUrl);
+<body class="bg-agency-dark text-white font-sans">
+  <div id="root"></div>
+
+  <script type="module">
+    const blobCache = new Map();
+
+    async function loadSource(path, parentUrl) {
+      const url = new URL(path, parentUrl).href;
+      if (/\.(tsx?|jsx?)($|\?)/i.test(url)) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Não encontrado: ${url}`);
+        return { url, code: await res.text() };
       }
 
-      // Motor principal de resolução e transpilação
-      async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
-        const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
-
-        if (blobCache.has(absoluteUrl)) return blobCache.get(absoluteUrl);
-
-        // Verifica imports para processar recursivamente
-        const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
-        const dependencies = new Map();
-        let match;
-        while ((match = importRegex.exec(sourceCode)) !== null) {
-          const depPath = match[1];
-          // Só processa arquivos locais (que começam com .)
-          if (depPath.startsWith('.')) {
-            dependencies.set(depPath, null);
-          }
-        }
-
-        await Promise.all(
-          Array.from(dependencies.keys()).map(async (depPath) => {
-            const childBlob = await resolveAndTranspile(depPath, absoluteUrl);
-            dependencies.set(depPath, childBlob);
-          })
-        );
-
-        // Substitui imports relativos pelos URLs de Blob (em memória)
-        let transformedCode = sourceCode;
-        for (const [orig, blobUrl] of dependencies.entries()) {
-          const re = new RegExp(`(['"])${orig}\\1`, 'g');
-          transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
-        }
-        
-        // HACK TÉCNICO: Se o código original tenta importar { GoogleGenAI } de @google/genai
-        // mas a biblioteca web @google/generative-ai só exporta { GoogleGenerativeAI },
-        // substituimos dinamicamente no texto do código para não quebrar.
-        if (transformedCode.includes('GoogleGenAI') && transformedCode.includes('@google/genai')) {
-             console.log("AllFines: Aplicando patch de compatibilidade Google AI SDK...");
-             transformedCode = transformedCode.replace(/GoogleGenAI/g, 'GoogleGenerativeAI');
-        }
-
-        // Transpilação
-        const { code } = Babel.transform(transformedCode, {
-          presets: [
-            ['react', { runtime: 'automatic' }],
-            ['typescript', { allExtensions: true, isTSX: true }]
-          ],
-          sourceType: 'module',
-          filename: absoluteUrl
-        });
-
-        const blobUrl = URL.createObjectURL(new Blob([code], { type: 'application/javascript' }));
-        blobCache.set(absoluteUrl, blobUrl);
-        return blobUrl;
-      }
-
-      // Inicialização
-      (async () => {
+      const candidates = [`${url}.tsx`, `${url}.ts`, `${url}/index.tsx`, `${url}/index.ts`];
+      for (const c of candidates) {
         try {
-          const entryUrl = await resolveAndTranspile('/index.tsx');
-          await import(entryUrl);
-        } catch (error) {
-          console.error('[AllFines Error]', error);
-          document.getElementById('root').innerHTML = `
-            <div style="padding:2rem; background:#1b0b0b; color:#ff8888; border-left:4px solid red; font-family:monospace; margin:20px;">
-              <h2 style="font-size:1.5em; font-weight:bold; margin-bottom:10px;">Erro na Aplicação</h2>
-              <p>${error.message}</p>
-              <br/>
-              <p style="opacity:0.7; font-size:0.9em">Dica: Se o erro for sobre "API Key", verifique se você definiu a chave no seu código (ex: const genAI = new GoogleGenerativeAI("SUA_KEY")). Variáveis de ambiente (.env) não funcionam diretamente no navegador.</p>
-            </div>`;
-        }
-      })();
-    </script>
-  </body>
+          const res = await fetch(c);
+          if (res.ok) return { url: c, code: await res.text() };
+        } catch {}
+      }
+      throw new Error(`Arquivo não encontrado: ${path}`);
+    }
+
+    async function transpile(filePath, parentUrl = import.meta.url) {
+      const { url, code } = await loadSource(filePath, parentUrl);
+      if (blobCache.has(url)) return blobCache.get(url);
+
+      // Resolve imports locais
+      const localImports = [...code.matchAll(/\bimport\s+[^'"]*['"]((\.{1,2}\/[^'"]+))['"]/g)]
+        .map(m => m[1]);
+
+      await Promise.all(localImports.map(async imp => {
+        const blob = await transpile(imp, url);
+        code = code.replace(new RegExp(`(['"])${imp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\1`, 'g'), `$1${blob}$1`);
+      }));
+
+      // PATCH AUTOMÁTICO: transforma @google/genai → @google/generative-ai no código
+      let finalCode = code
+        .replace(/@google\/genai/g, '@google/generative-ai')
+        .replace(/GoogleGenAI/g, 'GoogleGenerativeAI');
+
+      const transpiled = Babel.transform(finalCode, {
+        presets: [['react', { runtime: 'automatic' }], ['typescript', { isTSX: true, allExtensions: true }]],
+        filename: url,
+        sourceType: 'module'
+      }).code;
+
+      const blobUrl = URL.createObjectURL(new Blob([transpiled], { type: 'application/javascript' }));
+      blobCache.set(url, blobUrl);
+      return blobUrl;
+    }
+
+    (async () => {
+      try {
+        const entry = await transpile('/index.tsx');
+        await import(entry);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('root').innerHTML = `
+          <div style="padding:50px; text-align:center; font-family:system-ui; color:#ff5555; background:#1a0000; margin:30px; border-radius:16px;">
+            <h2>AllFines – Erro</h2>
+            <p>${err.message}</p>
+            <small>F12 → Console</small>
+          </div>`;
+      }
+    })();
+  </script>
+</body>
 </html>
