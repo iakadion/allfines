@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AllFines | Premium Audio</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- PRELOAD CRÍTICO -->
+  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -39,9 +45,24 @@
     ::-webkit-scrollbar-track { background: #020617; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
     ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
+    
+    /* Loading indicator */
+    #root:empty::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 40px;
+      margin: 100px auto;
+      border: 3px solid #334155;
+      border-top-color: #FFD700;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 
-  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+  <!-- Babel - versão mais leve -->
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
   <script type="importmap">
   {
@@ -60,75 +81,106 @@
 <body class="bg-agency-dark text-white font-sans">
   <div id="root"></div>
 
-  <!-- POLYFILL + PATCH FINAL (mata o process is not defined e o GoogleGenAI de uma vez) -->
   <script type="module">
-    // === POLYFILL GLOBAL PARA PROCESS (mata o erro mais comum do planeta) ===
+    // Polyfill global
     globalThis.process = { env: { NODE_ENV: 'production' } };
 
     const blobCache = new Map();
+    const fetchCache = new Map();
+
+    // Cache de fetch pra não buscar o mesmo arquivo 2x
+    async function cachedFetch(url) {
+      if (fetchCache.has(url)) return fetchCache.get(url);
+      const promise = fetch(url).then(r => r.ok ? r.text() : Promise.reject(`404: ${url}`));
+      fetchCache.set(url, promise);
+      return promise;
+    }
 
     async function loadSource(path, parentUrl) {
-      const url = new URL(path, parentUrl).href;
-      if (/\.(tsx?|jsx?)$/i.test(url)) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`404: ${url}`);
-        return { url, source: await res.text() };
+      const base = new URL(path, parentUrl).href.replace(/\/$/, '');
+      
+      // Se já tem extensão
+      if (/\.(tsx?|jsx?)$/i.test(base)) {
+        return { url: base, source: await cachedFetch(base) };
       }
-      const tries = [url + '.tsx', url + '.ts', url + '/index.tsx', url + '/index.ts'];
-      for (const t of tries) {
-        const r = await fetch(t);
-        if (r.ok) return { url: t, source: await r.text() };
-      }
+      
+      // Tenta extensões em paralelo (mais rápido!)
+      const candidates = [base + '.tsx', base + '.ts', base + '/index.tsx', base + '/index.ts'];
+      const results = await Promise.allSettled(candidates.map(u => cachedFetch(u).then(s => ({ url: u, source: s }))));
+      
+      const found = results.find(r => r.status === 'fulfilled');
+      if (found) return found.value;
+      
       throw new Error(`Arquivo não encontrado: ${path}`);
     }
 
-    async function transpile(path, parentUrl = import.meta.url) {
+    async function transpile(path, parentUrl = location.href) {
       const { url, source } = await loadSource(path, parentUrl);
+      
+      // CHECK CACHE PRIMEIRO (antes de processar qualquer coisa)
       if (blobCache.has(url)) return blobCache.get(url);
 
-      // Resolve imports locais (.tsx, ./components/X.tsx, etc)
-      const localImports = [...source.matchAll(/\bimport\s+[^'"]*['"]((\.{1,2}[^'"]*))['"]/g)].map(m => m[1]);
-
-      let code = source;
-
-      if (localImports.length) {
-        const blobs = await Promise.all(localImports.map(imp => transpile(imp, url)));
-        localImports.forEach((imp, i) => {
-          const esc = imp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          code = code.replace(new RegExp(`(['"])${esc}\\1`, 'g'), `$1${blobs[i]}$1`);
-        });
+      // Extrai imports locais
+      const importRegex = /\bimport\s+[^'"]*['"](\.[^'"]+)['"]/g;
+      const deps = new Map();
+      let match;
+      while ((match = importRegex.exec(source)) !== null) {
+        deps.set(match[1], null);
       }
 
-      // === PATCHES AUTOMÁTICOS (você não precisa mexer em nada do seu código) ===
-      code = code
-        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
-        .replace(/GoogleGenAI/g, 'GoogleGenerativeAI')
-        .replace(/\bprocess\.env\b/g, 'import.meta.env || {}'); // fallback seguro
+      // Resolve dependências em paralelo
+      await Promise.all(
+        [...deps.keys()].map(async dep => {
+          deps.set(dep, await transpile(dep, url));
+        })
+      );
 
-      const transpiled = Babel.transform(code, {
-        presets: [['react', { runtime: 'automatic' }], ['typescript', { isTSX: true, allExtensions: true }]],
+      // Substitui imports (método mais rápido)
+      let code = source;
+      for (const [dep, blob] of deps) {
+        code = code.split(`'${dep}'`).join(`'${blob}'`);
+        code = code.split(`"${dep}"`).join(`"${blob}"`);
+      }
+
+      // Patches só se necessário
+      if (code.includes('@google/genai')) {
+        code = code.replace(/from\s+['"]@google\/genai['"]/g, 'from "@google/generative-ai"');
+      }
+      if (code.includes('GoogleGenAI')) {
+        code = code.replace(/\bGoogleGenAI\b/g, 'GoogleGenerativeAI');
+      }
+
+      // Transpila
+      const { code: transpiled } = Babel.transform(code, {
+        presets: [
+          ['react', { runtime: 'automatic' }],
+          ['typescript', { isTSX: true, allExtensions: true }]
+        ],
         filename: url,
         sourceType: 'module'
-      }).code;
+      });
 
       const blobUrl = URL.createObjectURL(new Blob([transpiled], { type: 'application/javascript' }));
       blobCache.set(url, blobUrl);
       return blobUrl;
     }
 
-    // === START ===
-    try {
-      const entry = await transpile('/index.tsx');
-      await import(entry);
-    } catch (err) {
-      console.error('AllFines morreu:', err);
-      document.getElementById('root').innerHTML = `
-        <div style="padding:60px 20px; text-align:center; font-family:system-ui; color:#ff3366; background:#1a0000; margin:30px auto; max-width:700px; border-radius:16px; border:2px solid #440000;">
-          <h2>AllFines – Erro Fatal</h2>
-          <p style="font-size:1.2em;">${err.message}</p>
-          <small>F12 → Console para detalhes</small>
-        </div>`;
-    }
+    // START
+    (async () => {
+      try {
+        const t0 = performance.now();
+        const entry = await transpile('/index.tsx');
+        console.log(`⚡ Transpilado em ${(performance.now() - t0).toFixed(0)}ms`);
+        await import(entry);
+      } catch (err) {
+        console.error('Erro:', err);
+        document.getElementById('root').innerHTML = `
+          <div style="padding:60px 20px; text-align:center; font-family:system-ui; color:#ff3366; background:#1a0000; margin:30px auto; max-width:700px; border-radius:16px; border:2px solid #440000;">
+            <h2>AllFines – Erro</h2>
+            <p>${err.message || err}</p>
+          </div>`;
+      }
+    })();
   </script>
 </body>
 </html>
