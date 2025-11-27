@@ -3,23 +3,36 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#020617" />
+
+  <!-- SEO -->
   <title>AllFines | Premium Audio</title>
-  
-  <!-- Preconnects para acelerar DNS/TLS -->
+  <meta name="description" content="Premium audio experience with cutting-edge technology." />
+  <link rel="canonical" href="./" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="./" />
+  <meta property="og:title" content="AllFines | Premium Audio" />
+  <meta property="og:description" content="Premium audio experience with cutting-edge technology." />
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="./" />
+  <meta property="twitter:title" content="AllFines | Premium Audio" />
+  <meta property="twitter:description" content="Premium audio experience with cutting-edge technology." />
+
+  <!-- Preconnect para acelerar conexões -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://aistudiocdn.com" crossorigin />
-  <link rel="preconnect" href="https://unpkg.com" crossorigin />
   <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
-  
-  <!-- Preload crítico -->
-  <link rel="preload" href="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js" as="script" />
-  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
-  
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  
-  <!-- Tailwind -->
+
+  <!-- Preload crítico -->
+  <link rel="preload" href="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js" as="script" crossorigin />
+  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
+
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -37,195 +50,180 @@
               slate: '#1e293b',
             }
           },
-          animation: {
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'fade-in': 'fadeIn 0.5s ease-out forwards',
-          },
           keyframes: {
+            'reveal-word': {
+              from: { opacity: '0', transform: 'translateY(10px)' },
+              to: { opacity: '1', transform: 'translateY(0)' },
+            },
+            'letter-reveal': {
+              '0%': { opacity: 0, transform: 'translateY(20px) scale(0.8)' },
+              '100%': { opacity: 1, transform: 'translateY(0) scale(1)' },
+            },
+            'logo-bar-1': {
+              '0%': { transform: 'translateY(-40px)', opacity: 0 },
+              '100%': { transform: 'translateY(0)', opacity: 1 },
+            },
+            'logo-bar-2': {
+              '0%': { transform: 'translateY(40px)', opacity: 0 },
+              '100%': { transform: 'translateY(0)', opacity: 1 },
+            },
+            'blob-animation': {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
             fadeIn: {
               '0%': { opacity: '0', transform: 'translateY(10px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
+            },
+          },
+          animation: {
+            'reveal-word': 'reveal-word 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'letter-reveal': 'letter-reveal 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'logo-bar-1': 'logo-bar-1 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'logo-bar-2': 'logo-bar-2 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+            'blob': 'blob-animation 20s infinite ease-in-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
           }
         }
-      }
+      },
+      plugins: [
+        function ({ addUtilities }) {
+          addUtilities({
+            '.scrollbar-hide': {
+              '-ms-overflow-style': 'none',
+              'scrollbar-width': 'none',
+              '&::-webkit-scrollbar': { display: 'none' }
+            }
+          })
+        }
+      ]
     }
   </script>
-  
-  <!-- Import Map -->
+
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+  <!-- Import map atualizado -->
   <script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
-    "react/jsx-runtime": "https://aistudiocdn.com/react@^19.2.0/jsx-runtime",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
+    "react/jsx-runtime": "https://aistudiocdn.com/react@^19.2.0/jsx-runtime",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
 }
-  </script>
-  
+</script>
+
   <style>
-    body { background-color: #020617; color: white; }
+    html { overflow-y: auto; }
+    body {
+      background-color: #020617;
+      color: white;
+    }
+    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #020617; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
     ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
-    
-    /* Loading indicator */
-    #root:empty::after {
-      content: '';
-      display: block;
-      width: 40px;
-      height: 40px;
-      margin: 40vh auto;
-      border: 3px solid #334155;
-      border-top-color: #FFD700;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
-<body>
-  <noscript>JavaScript é necessário para esta aplicação.</noscript>
+<body class="bg-agency-dark text-white font-sans">
+  <noscript>Você precisa habilitar o JavaScript para rodar esta aplicação.</noscript>
   <div id="root"></div>
 
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
-  
   <script type="module">
-    // Cache global de módulos transpilados
-    const moduleCache = new Map();
+    const blobCache = new Map();
     const pendingLoads = new Map();
 
-    // Extensões a tentar na resolução
-    const EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js'];
-    const INDEX_FILES = EXTENSIONS.map(ext => '/index' + ext);
-
-    /**
-     * Resolve e carrega o código-fonte de um módulo
-     */
+    // Carrega o arquivo TS/TSX com cache de promessas para evitar duplicatas
     async function loadSource(path, parentUrl) {
       const baseUrl = new URL(path, parentUrl).href;
 
-      // Se já tem extensão válida, carrega direto
       if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
         const res = await fetch(baseUrl);
-        if (!res.ok) throw new Error(`404: ${baseUrl}`);
-        return { url: baseUrl, code: await res.text() };
+        if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
+        return { absoluteUrl: baseUrl, sourceCode: await res.text() };
       }
 
-      // Tenta variações de extensão
       const base = baseUrl.replace(/\/$/, '');
-      const candidates = [
-        ...EXTENSIONS.map(ext => base + ext),
-        ...INDEX_FILES.map(file => base + file)
-      ];
+      const candidates = [base + '.tsx', base + '.ts', base + '/index.tsx', base + '/index.ts'];
 
       for (const url of candidates) {
-        const res = await fetch(url, { method: 'HEAD' }).catch(() => null);
-        if (res?.ok) {
-          const fullRes = await fetch(url);
-          return { url, code: await fullRes.text() };
-        }
+        try {
+          const res = await fetch(url);
+          if (res.ok) return { absoluteUrl: url, sourceCode: await res.text() };
+        } catch (_) {}
       }
 
-      throw new Error(`Módulo não encontrado: ${path}`);
+      throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
     }
 
-    /**
-     * Extrai imports relativos do código
-     */
-    function extractRelativeImports(code) {
-      const imports = new Set();
-      const regex = /\bimport\s+(?:[^'"]*\s+from\s+)?['"](\.[^'"]+)['"]/g;
-      let match;
-      while ((match = regex.exec(code))) {
-        imports.add(match[1]);
-      }
-      // Também captura exports de arquivos
-      const exportRegex = /\bexport\s+(?:\*|\{[^}]*\})\s+from\s+['"](\.[^'"]+)['"]/g;
-      while ((match = exportRegex.exec(code))) {
-        imports.add(match[1]);
-      }
-      return imports;
-    }
+    async function resolveAndTranspile(entryPath, parentUrl = location.href) {
+      const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
 
-    /**
-     * Resolve, transpila e retorna blob URL do módulo
-     */
-    async function resolveModule(entryPath, parentUrl = location.href) {
-      const { url, code } = await loadSource(entryPath, parentUrl);
+      // Retorna cache se existir
+      if (blobCache.has(absoluteUrl)) return blobCache.get(absoluteUrl);
 
-      // Retorna do cache se já processado
-      if (moduleCache.has(url)) return moduleCache.get(url);
+      // Evita processamento duplicado de arquivos em paralelo
+      if (pendingLoads.has(absoluteUrl)) return pendingLoads.get(absoluteUrl);
 
-      // Evita processar o mesmo módulo em paralelo
-      if (pendingLoads.has(url)) return pendingLoads.get(url);
+      const processPromise = (async () => {
+        // Extrai imports relativos
+        const importRegex = /\bimport\s+[^'"]*['"](\..*?)['"]/g;
+        const deps = new Map();
+        let m;
+        while ((m = importRegex.exec(sourceCode))) deps.set(m[1], null);
 
-      const promise = (async () => {
-        // Extrai e resolve dependências locais em paralelo
-        const deps = extractRelativeImports(code);
-        const resolved = new Map();
+        // Resolve dependências em paralelo
+        await Promise.all([...deps.keys()].map(async (dep) => {
+          deps.set(dep, await resolveAndTranspile(dep, absoluteUrl));
+        }));
 
-        await Promise.all(
-          [...deps].map(async dep => {
-            const blobUrl = await resolveModule(dep, url);
-            resolved.set(dep, blobUrl);
-          })
-        );
-
-        // Substitui imports relativos pelos blob URLs
-        let transformed = code;
-        for (const [original, blobUrl] of resolved) {
-          transformed = transformed.replaceAll(
-            new RegExp(`(['"])${original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\1`, 'g'),
-            `$1${blobUrl}$1`
-          );
+        // Reescreve imports para blob URLs
+        let code = sourceCode;
+        for (const [orig, blob] of deps) {
+          code = code.replace(new RegExp(`(['"])${orig.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\1`, 'g'), `$1${blob}$1`);
         }
 
         // Transpila com Babel
-        const { code: jsCode } = Babel.transform(transformed, {
+        const { code: transpiled } = Babel.transform(code, {
           presets: [
             ['react', { runtime: 'automatic' }],
             ['typescript', { allExtensions: true, isTSX: true }]
           ],
           sourceType: 'module',
-          filename: url
+          filename: absoluteUrl
         });
 
-        // Cria blob URL
-        const blob = new Blob([jsCode], { type: 'application/javascript' });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        moduleCache.set(url, blobUrl);
-        pendingLoads.delete(url);
-        
+        // Cria Blob URL
+        const blobUrl = URL.createObjectURL(new Blob([transpiled], { type: 'application/javascript' }));
+        blobCache.set(absoluteUrl, blobUrl);
+        pendingLoads.delete(absoluteUrl);
         return blobUrl;
       })();
 
-      pendingLoads.set(url, promise);
-      return promise;
+      pendingLoads.set(absoluteUrl, processPromise);
+      return processPromise;
     }
 
-    // Bootstrap da aplicação
     (async () => {
       try {
-        const startTime = performance.now();
-        const entryUrl = await resolveModule('/index.tsx');
-        await import(entryUrl);
-        console.log(`✓ App carregada em ${(performance.now() - startTime).toFixed(0)}ms`);
-      } catch (error) {
-        console.error('Erro ao carregar aplicação:', error);
+        const entry = await resolveAndTranspile('/index.tsx');
+        await import(entry);
+      } catch (e) {
+        console.error('Falha ao inicializar:', e);
         document.getElementById('root').innerHTML = `
-          <div style="max-width:600px;margin:40px auto;padding:24px;background:#1e1e2e;border-left:4px solid #f38ba8;border-radius:8px;font-family:monospace;">
-            <h2 style="color:#f38ba8;margin:0 0 12px;">Erro de Inicialização</h2>
-            <pre style="color:#cdd6f4;white-space:pre-wrap;word-break:break-word;margin:0;">${error.message}\n\n${error.stack || ''}</pre>
-          </div>
-        `;
+          <div style="color:#ff8b8b;background:#2b0f0f;padding:20px;border-radius:8px;font-family:monospace;white-space:pre-wrap;margin:20px;">
+            <h2>Erro na Aplicação</h2>
+            <p>${e.message}</p>
+          </div>`;
       }
     })();
   </script>
