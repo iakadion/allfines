@@ -1,193 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <!-- Identidade Visual do Projeto 2 (AllFines) -->
-  <title>AllFines | Premium Audio</title>
-  
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Otimização: Pré-carrega o arquivo de entrada para ganhar tempo -->
-  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Space Grotesk', 'sans-serif'],
-          },
-          colors: {
-            agency: {
-              yellow: '#FFD700', // Gold/Yellow
-              black: '#0a0a0a',
-              dark: '#020617',  // Very dark blue
-              slate: '#1e293b',
-            }
-          },
-          animation: {
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'fade-in': 'fadeIn 0.5s ease-out forwards',
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AllFines | Premium Audio</title>
+    
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Config Original -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+            },
+            colors: {
+              agency: {
+                yellow: '#FFD700',
+                black: '#0a0a0a',
+                dark: '#020617',
+                slate: '#1e293b',
+              }
+            },
+            animation: {
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
             }
           }
         }
       }
-    }
-  </script>
+    </script>
+    
+    <!-- Estilos Originais -->
+    <style>
+      body {
+        background-color: #020617;
+        color: white;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #020617; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155; 
+        border-radius: 0px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #FFD700; 
+      }
+    </style>
 
-  <style>
-    body {
-      background-color: #020617;
-      color: white;
-      /* Garante que o container ocupe altura total se necessário */
-      min-height: 100vh;
-    }
-    /* Custom Scrollbar do Código 2 */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #020617; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 0px; }
-    ::-webkit-scrollbar-thumb:hover { background: #FFD700; }
-  </style>
+    <!-- Babel Standalone para Transpilação -->
+    <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
-  <!-- Essencial para a transpilação (Vindo do Código 1) -->
-  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
-
-  <!-- Import Map Otimizado (Mantendo libs do Código 2, mas ajustado para funcionar com o Transpilador) -->
-  <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@19.0.0",
-      "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-      "react/jsx-runtime": "https://esm.sh/react@19.0.0/jsx-runtime",
-      "lucide-react": "https://esm.sh/lucide-react@0.344.0",
-      "@google/genai": "https://esm.sh/@google/genai@0.1.0"
-    }
+    <!-- Import Map Atualizado -->
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "@google/genai": "https://esm.sh/@google/genai@0.14.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.555.0"
   }
-  </script>
-</head>
-<body>
-  <noscript>Você precisa habilitar o JavaScript para rodar esta aplicação.</noscript>
-  <div id="root"></div>
+}
+</script>
 
-  <!-- Lógica de Transpilação (Adaptada do Código 1 para rodar no Código 2) -->
-  <script type="module">
-    const blobCache = new Map();
+    <!-- Pré-carrega o entry -->
+    <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
+  </head>
+  
+  <body>
+    <noscript>Você precisa habilitar o JavaScript para rodar esta aplicação.</noscript>
+    <div id="root"></div>
 
-    // 1. Carrega o arquivo TS/TSX, tentando extensões padrão
-    async function loadSource(path, parentUrl) {
-      const baseUrl = new URL(path, parentUrl).href;
+    <script type="module">
+      const blobCache = new Map();
 
-      // Se já tem extensão explícita de código
-      if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
-        const res = await fetch(baseUrl);
-        if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
-        return { absoluteUrl: baseUrl, sourceCode: await res.text() };
-      }
+      // Carrega o arquivo TS/TSX, tentando extensões padrão
+      async function loadSource(path, parentUrl) {
+        const baseUrl = new URL(path, parentUrl).href;
 
-      // Tenta adivinhar a extensão (.tsx, .ts, /index.tsx, etc)
-      const base = baseUrl.replace(/\/$/, '');
-      const candidates = [
-        base + '.tsx',
-        base + '.ts',
-        base + '/index.tsx',
-        base + '/index.ts',
-      ];
-
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            return { absoluteUrl: url, sourceCode: await res.text() };
-          }
-        } catch (_) { /* continua */ }
-      }
-
-      throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
-    }
-
-    // 2. Resolve imports, transpila e cria Blobs
-    async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
-      // Carrega o código fonte
-      const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
-
-      // Retorna do cache se já processado
-      if (blobCache.has(absoluteUrl)) {
-        return blobCache.get(absoluteUrl);
-      }
-
-      // Encontra imports relativos (começando com .)
-      const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
-      const dependencies = new Map();
-      let match;
-      while ((match = importRegex.exec(sourceCode)) !== null) {
-        const depPath = match[1];
-        if (depPath.startsWith('.')) {
-          dependencies.set(depPath, null);
+        // Se já tem extensão, tenta direto
+        if (/\.(tsx?|jsx?)($|\?)/.test(baseUrl)) {
+          const res = await fetch(baseUrl);
+          if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
+          return { absoluteUrl: baseUrl, sourceCode: await res.text() };
         }
+
+        const base = baseUrl.replace(/\/$/, '');
+        const candidates = [
+          base + '.tsx',
+          base + '.ts',
+          base + '/index.tsx',
+          base + '/index.ts',
+        ];
+
+        for (const url of candidates) {
+          try {
+            const res = await fetch(url);
+            if (res.ok) {
+              return { absoluteUrl: url, sourceCode: await res.text() };
+            }
+          } catch (_) {
+            // ignora, tenta o próximo
+          }
+        }
+
+        throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
       }
 
-      // Resolve dependências recursivamente (Paralelo para velocidade)
-      await Promise.all(
-        Array.from(dependencies.keys()).map(async (depPath) => {
-          const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
-          dependencies.set(depPath, childBlobUrl);
-        })
-      );
+      async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
+        // 1) Descobre o arquivo real (.tsx/.ts) e lê o código-fonte
+        const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
 
-      // Reescreve o código substituindo imports locais por Blob URLs
-      let transformedCode = sourceCode;
-      for (const [originalPath, blobUrl] of dependencies.entries()) {
-        // Regex seguro para substituir apenas o caminho dentro das aspas
-        const re = new RegExp(`(['"])${originalPath}\\1`, 'g');
-        transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
+        // Cache por arquivo real (URL com extensão)
+        if (blobCache.has(absoluteUrl)) {
+          return blobCache.get(absoluteUrl);
+        }
+
+        // 2) Descobre imports relativos (somente "import ... from '...';")
+        const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
+        const dependencies = new Map();
+        let match;
+        while ((match = importRegex.exec(sourceCode)) !== null) {
+          const depPath = match[1];
+          if (depPath.startsWith('.')) {
+            dependencies.set(depPath, null);
+          }
+        }
+
+        // 3) Resolve recursivamente as dependências em paralelo
+        await Promise.all(
+          Array.from(dependencies.keys()).map(async (depPath) => {
+            const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
+            dependencies.set(depPath, childBlobUrl);
+          })
+        );
+
+        // 4) Reescreve os imports locais para apontar para os blobs
+        let transformedCode = sourceCode;
+        for (const [originalPath, blobUrl] of dependencies.entries()) {
+          const re = new RegExp(`(['"])${originalPath}\\1`, 'g');
+          transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
+        }
+
+        // 5) Transpila TSX -> JS com Babel (React + TypeScript)
+        const { code } = Babel.transform(transformedCode, {
+          presets: [
+            ['react', { runtime: 'automatic' }],
+            ['typescript', { allExtensions: true, isTSX: true }]
+          ],
+          sourceType: 'module',
+          filename: absoluteUrl
+        });
+
+        // 6) Cria um Blob URL para esse módulo e guarda em cache
+        const blobUrl = URL.createObjectURL(
+          new Blob([code], { type: 'application/javascript' })
+        );
+
+        blobCache.set(absoluteUrl, blobUrl);
+        return blobUrl;
       }
 
-      // Transpila TSX -> JS usando Babel
-      const { code } = Babel.transform(transformedCode, {
-        presets: [
-          ['react', { runtime: 'automatic' }], // Requer react/jsx-runtime no importmap
-          ['typescript', { allExtensions: true, isTSX: true }]
-        ],
-        sourceType: 'module',
-        filename: absoluteUrl
-      });
-
-      // Cria o Blob final
-      const blobUrl = URL.createObjectURL(
-        new Blob([code], { type: 'application/javascript' })
-      );
-
-      blobCache.set(absoluteUrl, blobUrl);
-      return blobUrl;
-    }
-
-    // 3. Inicialização
-    (async () => {
-      try {
-        // Ponto de entrada fixo no index.tsx
-        const entryModuleUrl = await resolveAndTranspile('/index.tsx');
-        await import(entryModuleUrl);
-      } catch (error) {
-        console.error('Fatal Error:', error);
-        const rootEl = document.getElementById('root');
-        rootEl.innerHTML =
-          `<div style="color:#ef4444; background:#1a1a1a; padding:24px; margin:20px; border-radius:12px; font-family:'Inter', sans-serif;">
-             <h2 style="font-size:1.5rem; font-weight:700; margin-bottom:10px;">Application Error</h2>
-             <p style="font-family:monospace; opacity:0.8;">${error.message}</p>
-           </div>`;
-      }
-    })();
-  </script>
-</body>
+      (async () => {
+        try {
+          // Entrada da app: /index.tsx
+          const entryModuleUrl = await resolveAndTranspile('/index.tsx');
+          await import(entryModuleUrl);
+        } catch (error) {
+          console.error('Falha ao inicializar a aplicação:', error);
+          const rootEl = document.getElementById('root');
+          rootEl.innerHTML =
+            `<div style="color:#ff8b8b; background:#2b0f0f; padding:20px; border-radius:8px; font-family:monospace; white-space:pre-wrap;">
+               <h2>Erro na Aplicação</h2>
+               <p>${error.message}</p>
+             </div>`;
+        }
+      })();
+    </script>
+  </body>
 </html>
