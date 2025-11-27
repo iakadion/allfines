@@ -2,20 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0B071A" />
+  <title>AllFines | Premium Audio</title>
 
-  <!-- SEO -->
-  <title>fillshy - Autonomous AI Content Pipeline</title>
-  <meta name="description" content="Generate diverse content 24/7 with AI and save it directly to your GitHub repository." />
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Sora:wght@600;700&display=swap" rel="stylesheet">
-
-  <!-- Tailwind CDN + Config -->
+  <!-- Tailwind + fontes -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -23,96 +14,99 @@
         extend: {
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
-            heading: ['Sora', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
           },
-          keyframes: {
-            'reveal-word': { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-            'letter-reveal': { '0%': { opacity: 0, transform: 'translateY(20px) scale(0.8)' }, '100%': { opacity: 1, transform: 'translateY(0) scale(1)' } },
-            'logo-bar-1': { '0%': { transform: 'translateY(-40px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
-            'logo-bar-2': { '0%': { transform: 'translateY(40px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
-            'blob-animation': {
-              '0%': { transform: 'translate(0px, 0px) scale(1)' },
-              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-              '100%': { transform: 'translate(0px, 0px) scale(1)' },
-            },
-            'fade-in': { from: { opacity: 0 }, to: { opacity: 1 } },
+          colors: {
+            agency: {
+              yellow: '#FFD700',
+              black: '#0a0a0a',
+              dark: '#020617',
+              slate: '#1e293b',
+            }
           },
           animation: {
-            'reveal-word': 'reveal-word 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'letter-reveal': 'letter-reveal 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'logo-bar-1': 'logo-bar-1 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'logo-bar-2': 'logo-bar-2 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
-            'blob': 'blob-animation 20s infinite ease-in-out',
-            'fade-in': 'fade-in 0.3s ease-in-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
           }
         }
-      },
-      plugins: [
-        function ({ addUtilities }) {
-          addUtilities({
-            '.scrollbar-hide': {
-              '-ms-overflow-style': 'none',
-              'scrollbar-width': 'none',
-              '&::-webkit-scrollbar': { display: 'none' }
-            }
-          })
-        }
-      ]
+      }
     }
   </script>
 
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
-
-  <!-- Import map CORRIGIDO -->
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-    
-    "@google/genai": "https://esm.sh/@google/generative-ai@0.21.0",
-    "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.21.0"
-  }
-}
-</script>
-
   <style>
-    html { overflow-y: auto; }
+    body {
+      background-color: #020617;
+      color: white;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 0px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FFD700;
+    }
   </style>
+
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+
+  <!-- Import map (React + lucide + Google GenAI) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+      "lucide-react": "https://esm.sh/lucide-react@0.555.0",
+      "@google/genai": "https://esm.sh/@google/generative-ai@0.21.0",
+      "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.21.0"
+    }
+  }
+  </script>
+
+  <!-- Pré-carrega o entry (melhora um pouco o tempo de carregamento) -->
+  <link rel="preload" href="/index.tsx" as="fetch" crossorigin="anonymous" />
 </head>
-<body class="bg-[#0B071A] text-[#E0DDF0] font-sans">
+
+<body class="bg-agency-dark text-white font-sans">
+  <noscript>Você precisa habilitar o JavaScript para rodar esta aplicação.</noscript>
   <div id="root"></div>
 
   <script type="module">
-    // 1. CORREÇÃO DE POLYFILL (Evita a tela azul/branca se o código usar process.env)
+    // Polyfill básico de process para libs que esperam Node
     globalThis.process = { env: { NODE_ENV: 'production' } };
 
     const blobCache = new Map();
 
+    // Carrega o arquivo TS/TSX, tentando extensões padrão (.tsx, .ts, /index.tsx, /index.ts)
     async function loadSource(path, parentUrl) {
       const baseUrl = new URL(path, parentUrl).href;
-      
-      // Tenta carregar com a extensão exata primeiro
-      if (/\.(tsx?|jsx?|js)($|\?)/.test(baseUrl)) {
-        try {
-            const res = await fetch(baseUrl);
-            if (!res.ok) throw new Error();
-            return { absoluteUrl: baseUrl, sourceCode: await res.text() };
-        } catch(e) {}
+
+      // Se já tem extensão, tenta direto
+      if (/\.(tsx?|jsx?)($|\?)/i.test(baseUrl)) {
+        const res = await fetch(baseUrl);
+        if (!res.ok) throw new Error('Não foi possível carregar ' + baseUrl);
+        return { absoluteUrl: baseUrl, sourceCode: await res.text() };
       }
 
-      // Tenta adivinhar as extensões se falhar
       const base = baseUrl.replace(/\/$/, '');
       const candidates = [
         base + '.tsx',
         base + '.ts',
         base + '/index.tsx',
-        base + '/index.ts',
-        base + '.js',
-        base + '.jsx'
+        base + '/index.ts'
       ];
 
       for (const url of candidates) {
@@ -121,20 +115,24 @@
           if (res.ok) {
             return { absoluteUrl: url, sourceCode: await res.text() };
           }
-        } catch (_) {}
+        } catch (_) {
+          // ignora, tenta o próximo
+        }
       }
-      throw new Error('404: ' + baseUrl);
+
+      throw new Error('Não foi possível encontrar o arquivo para ' + baseUrl);
     }
 
     async function resolveAndTranspile(entryPath, parentUrl = window.location.href) {
-      // 1) Carrega o arquivo
+      // 1) Descobre o arquivo real (.tsx/.ts) e lê o código-fonte
       const { absoluteUrl, sourceCode } = await loadSource(entryPath, parentUrl);
 
+      // Cache por arquivo real (URL com extensão)
       if (blobCache.has(absoluteUrl)) {
         return blobCache.get(absoluteUrl);
       }
 
-      // 2) Identifica imports locais
+      // 2) Descobre imports relativos (somente "import ... from '...';")
       const importRegex = /\bimport\s+[^'"]*['"](.*?)['"]/g;
       const dependencies = new Map();
       let match;
@@ -145,7 +143,7 @@
         }
       }
 
-      // 3) Carrega dependências em paralelo (mais rápido)
+      // 3) Resolve recursivamente as dependências em paralelo
       await Promise.all(
         Array.from(dependencies.keys()).map(async (depPath) => {
           const childBlobUrl = await resolveAndTranspile(depPath, absoluteUrl);
@@ -153,21 +151,23 @@
         })
       );
 
-      // 4) Reescreve imports para Blobs
+      // 4) Reescreve os imports locais para apontar para os blobs
       let transformedCode = sourceCode;
-      
-      // Correção de código automática (O PATCH MÁGICO)
-      // Substitui a chamada antiga "GoogleGenAI" pela "GoogleGenerativeAI" do navegador
-      transformedCode = transformedCode
-        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
-        .replace(/\bGoogleGenAI\b/g, 'GoogleGenerativeAI');
-
       for (const [originalPath, blobUrl] of dependencies.entries()) {
-        const re = new RegExp(`(['"])${originalPath}\\1`, 'g');
+        const re = new RegExp(`(['"])${originalPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\1`, 'g');
         transformedCode = transformedCode.replace(re, `$1${blobUrl}$1`);
       }
 
-      // 5) Babel
+      // 4.1) PATCHES específicos do AllFines / Google GenAI
+      transformedCode = transformedCode
+        // troca o módulo do AI Studio pelo pacote oficial
+        .replace(/from\s+['"]@google\/genai['"]/g, `from "@google/generative-ai"`)
+        // classe antiga → nova
+        .replace(/GoogleGenAI/g, 'GoogleGenerativeAI')
+        // uso de process.env no código do app
+        .replace(/\bprocess\.env\b/g, 'import.meta.env || {}');
+
+      // 5) Transpila TSX -> JS com Babel (React + TypeScript)
       const { code } = Babel.transform(transformedCode, {
         presets: [
           ['react', { runtime: 'automatic' }],
@@ -177,6 +177,7 @@
         filename: absoluteUrl
       });
 
+      // 6) Cria um Blob URL para esse módulo e guarda em cache
       const blobUrl = URL.createObjectURL(
         new Blob([code], { type: 'application/javascript' })
       );
@@ -186,16 +187,25 @@
     }
 
     (async () => {
+      const rootEl = document.getElementById('root');
+      // Mensagem de loading enquanto transpila
+      rootEl.innerHTML = `
+        <div style="padding:40px; text-align:center; font-family:system-ui; color:#ffffffb3;">
+          Carregando aplicação AllFines (transpilando TypeScript no navegador)...
+        </div>
+      `;
+
       try {
-        const entryModuleUrl = await resolveAndTranspile('/index.tsx'); // Certifique-se que seu arquivo inicial é index.tsx
+        // Se o entry não for /index.tsx, troque aqui:
+        const entryModuleUrl = await resolveAndTranspile('/index.tsx');
         await import(entryModuleUrl);
       } catch (error) {
-        console.error('Crash Fatal:', error);
-        document.getElementById('root').innerHTML =
-          `<div style="color:#ff5555; background:#1a0000; padding:20px; font-family:monospace;">
-             <h2>Erro ao iniciar</h2>
-             <p>${error.message}</p>
-             <p>Verifique o Console (F12) para detalhes.</p>
+        console.error('Falha ao inicializar a aplicação AllFines:', error);
+        rootEl.innerHTML =
+          `<div style="padding:60px 20px; text-align:center; font-family:system-ui; color:#ff3366; background:#1a0000; margin:30px auto; max-width:700px; border-radius:16px; border:2px solid #440000;">
+             <h2>AllFines – Erro Fatal</h2>
+             <p style="font-size:1.2em;">${error.message}</p>
+             <small>Abra o console (F12) para ver detalhes.</small>
            </div>`;
       }
     })();
